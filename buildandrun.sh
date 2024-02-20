@@ -1,4 +1,4 @@
 mkdir -p bin
-g++ *.cpp -o bin/MultiThreadPractice
+g++ -std=c++20 *.cpp -o bin/MultiThreadPractice
 ./bin/MultiThreadPractice
 read
