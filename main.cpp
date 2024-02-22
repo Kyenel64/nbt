@@ -1,12 +1,29 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 #include "ThreadGuard.h"
+
+// Put mutex along side data. In class, make both member variables.
+std::vector<int> SomeVector;
+std::mutex SomeMutex;
 
 void Hello(int val)
 {
     std::cout << "Hello Concurrent program!" << " Val:" << val << "\n";
+}
+
+void AddToVector(int value)
+{
+    std::scoped_lock guard(SomeMutex);
+    SomeVector.push_back(value);
+}
+
+bool Contains(int value)
+{
+    std::scoped_lock guard(SomeMutex);
+    return std::find(SomeVector.begin(), SomeVector.end(), value) != SomeVector.end();
 }
 
 int main() // thread 1
