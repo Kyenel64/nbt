@@ -1,78 +1,78 @@
 #pragma once
 
-#include <queue>
+#include <stack>
 #include <mutex>
 #include <exception>
 #include <condition_variable>
 
-namespace nbt
+namespace NBT
 {
 	template <typename T>
-	class threadsafe_queue
+	class ThreadSafeStack
 	{
 	public:
-		threadsafe_queue() = default;
+		ThreadSafeStack() = default;
 
-		threadsafe_queue(const threadsafe_queue& other)
+		ThreadSafeStack(const ThreadSafeStack& other)
 		{
 			std::lock_guard<std::mutex> lock(m_Mutex);
-			m_Queue = other.m_Queue;
+			m_Stack = other.m_Stack;
 		}
 
-		threadsafe_queue& operator=(const threadsafe_queue&) = delete;
+		ThreadSafeStack& operator=(const ThreadSafeStack&) = delete;
 
 		void push(T value)
 		{
 			std::lock_guard<std::mutex> lock(m_Mutex);
-			m_Queue.push(std::move(value));
+			m_Stack.push(std::move(value));
 			m_Condition.notify_one();
 		}
 
 		void wait_and_pop(T& val)
 		{
 			std::unique_lock<std::mutex> lock(m_Mutex);
-			m_Condition.wait(lock, [this]{ return !m_Queue.empty(); });
-			val = std::move(m_Queue.front());
-			m_Queue.pop();
+			m_Condition.wait(lock, [this]{ return !m_Stack.empty(); });
+			val = std::move(m_Stack.top());
+			m_Stack.pop();
 		}
 
 		std::shared_ptr<T> wait_and_pop()
 		{
 			std::unique_lock<std::mutex> lock(m_Mutex);
-			m_Condition.wait(lock, [this]{ return !m_Queue.empty(); });
-			std::shared_ptr<T> res(std::make_shared<T>(std::move(m_Queue.front())));
-			m_Queue.pop();
+			m_Condition.wait(lock, [this]{ return !m_Stack.empty(); });
+			std::shared_ptr<T> res(std::make_shared<T>(std::move(m_Stack.top())));
+			m_Stack.pop();
 			return res;
 		}
 
 		bool try_pop(T& val)
 		{
 			std::lock_guard<std::mutex> lock(m_Mutex);
-			if (m_Queue.empty())
+			if (m_Stack.empty())
 				return false;
-			val = std::move(m_Queue.front());
-			m_Queue.pop();
+			val = std::move(m_Stack.top());
+			m_Stack.pop();
 			return true;
 		}
 
 		std::shared_ptr<T> try_pop()
 		{
 			std::lock_guard<std::mutex> lock(m_Mutex);
-			if (m_Queue.empty())
+			if (m_Stack.empty())
 				return nullptr;
-			std::shared_ptr<T> res(std::make_shared<T>(std::move(m_Queue.front())));
-			m_Queue.pop();
+			std::shared_ptr<T> res(std::make_shared<T>(std::move(m_Stack.top())));
+			m_Stack.pop();
 			return res;
 		}
 
 		[[nodiscard]] bool empty() const
 		{
 			std::lock_guard<std::mutex> lock(m_Mutex);
-			return m_Queue.empty();
+			return m_Stack.empty();
 		}
 
 	private:
-		std::queue<T> m_Queue;
+		std::stack<T> m_Stack;
 		mutable std::mutex m_Mutex;
 		std::condition_variable m_Condition;
 	};

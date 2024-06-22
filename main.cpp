@@ -3,10 +3,10 @@
 #include <vector>
 #include <mutex>
 
-#include "threads/scoped_thread.h"
-#include "threads/joining_thread.h"
-#include "threads/threadsafe_stack.h"
-#include "threads/threadsafe_queue.h"
+#include "threads/ScopedThread.h"
+#include "threads/JoiningThread.h"
+#include "threads/ThreadSafeStack.h"
+#include "threads/ThreadSafeQueue.h"
 
 // Put mutex alongside data. In class, make both member variables.
 std::vector<int> SomeVector;
@@ -34,16 +34,16 @@ int main() // thread 1
     unsigned int maxThreads = std::thread::hardware_concurrency();
     int localVal = 10;
     //std::thread t1(Hello, localVal);
-	nbt::scoped_thread scopedThread = { std::thread(Hello, localVal) };
+	NBT::ScopedThread scopedThread = {std::thread(Hello, localVal) };
 
-	nbt::threadsafe_queue<int> queue;
+	NBT::ThreadSafeQueue<int> queue;
 
-	nbt::scoped_thread t1 = { std::thread([&]()
+	NBT::ScopedThread t1 = {std::thread([&]()
 	{
 		queue.push(5);
 	}) };
 
-	nbt::scoped_thread t2 = { std::thread([&]()
+	NBT::ScopedThread t2 = {std::thread([&]()
 	{
 		auto val = queue.wait_and_pop();
 		std::cout << *val << std::endl;

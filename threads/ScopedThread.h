@@ -2,25 +2,25 @@
 
 #include <thread>
 
-namespace nbt
+namespace NBT
 {
-	class scoped_thread
+	class ScopedThread
 	{
 	public:
-		scoped_thread(std::thread thread)
+		ScopedThread(std::thread thread)
 				: m_Thread(std::move(thread))
 		{
 			if (!m_Thread.joinable())
 				std::logic_error("No thread");
 		}
-		~scoped_thread()
+		~ScopedThread()
 		{
 			m_Thread.join();
 		}
 
 		// Disable copy constructor and copy assignment
-		scoped_thread(scoped_thread const&) = delete;
-		scoped_thread& operator=(scoped_thread const&) = delete;
+		ScopedThread(ScopedThread const&) = delete;
+		ScopedThread& operator=(ScopedThread const&) = delete;
 	private:
 		std::thread m_Thread;
 	};

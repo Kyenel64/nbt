@@ -2,27 +2,27 @@
 
 #include <thread>
 
-namespace nbt
+namespace NBT
 {
-	class joining_thread
+	class JoiningThread
 	{
 	public:
-		joining_thread() noexcept = default;
+		JoiningThread() noexcept = default;
 
 		template<typename Callable, typename... Args>
-		explicit joining_thread(Callable&& func, Args&&... args)
+		explicit JoiningThread(Callable&& func, Args&&... args)
 				: m_Thread(std::thread(std::forward<Callable>(func), std::forward<Args>(args)...)) {}
 
-		explicit joining_thread(std::thread t) noexcept : m_Thread(std::move(t)) {}
-		joining_thread(joining_thread&& other) noexcept : m_Thread(std::move(other.m_Thread)) {}
+		explicit JoiningThread(std::thread t) noexcept : m_Thread(std::move(t)) {}
+		JoiningThread(JoiningThread&& other) noexcept : m_Thread(std::move(other.m_Thread)) {}
 
-		~joining_thread() noexcept
+		~JoiningThread() noexcept
 		{
 			if (m_Thread.joinable())
 				m_Thread.join();
 		}
 
-		joining_thread& operator=(joining_thread&& other) noexcept
+		JoiningThread& operator=(JoiningThread&& other) noexcept
 		{
 			if (m_Thread.joinable())
 				m_Thread.join();
@@ -30,7 +30,7 @@ namespace nbt
 			return *this;
 		}
 
-		joining_thread& operator=(std::thread other) noexcept
+		JoiningThread& operator=(std::thread other) noexcept
 		{
 			if (m_Thread.joinable())
 				m_Thread.join();
@@ -38,7 +38,7 @@ namespace nbt
 			return *this;
 		}
 
-		void swap(joining_thread& other) { m_Thread.swap(other.m_Thread); }
+		void swap(JoiningThread& other) { m_Thread.swap(other.m_Thread); }
 		void join() { m_Thread.join(); }
 		void detach() { m_Thread.detach(); }
 

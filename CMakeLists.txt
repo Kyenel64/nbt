@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.27)
 
-project ("MultiThreadPractice")
+project ("NBT")
 
 set (SrcFiles
-"threads/joining_thread.h"
-        "threads/scoped_thread.h"
+"threads/JoiningThread.h"
+        "threads/ScopedThread.h"
         "main.cpp"
-        threads/threadsafe_stack.h
-        threads/threadsafe_queue.h)
+        "threads/ThreadSafeStack.h"
+        "threads/ThreadSafeQueue.h"
+        "threads/ThreadPool.cpp"
+        "threads/ThreadPool.h")
 
 add_executable(${PROJECT_NAME} ${SrcFiles})
 
