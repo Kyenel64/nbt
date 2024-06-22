@@ -3,9 +3,12 @@
 #include <vector>
 #include <mutex>
 
-#include "ThreadGuard.h"
+#include "threads/scoped_thread.h"
+#include "threads/joining_thread.h"
+#include "threads/threadsafe_stack.h"
+#include "threads/threadsafe_queue.h"
 
-// Put mutex along side data. In class, make both member variables.
+// Put mutex alongside data. In class, make both member variables.
 std::vector<int> SomeVector;
 std::mutex SomeMutex;
 
@@ -28,23 +31,40 @@ bool Contains(int value)
 
 int main() // thread 1
 {
-    int maxThreads = std::thread::hardware_concurrency();
+    unsigned int maxThreads = std::thread::hardware_concurrency();
     int localVal = 10;
-    std::thread t1(Hello, localVal); // thread 2. localVal is a pointer to the local val. 
-    ThreadGuard tg1(t1);
+    //std::thread t1(Hello, localVal);
+	nbt::scoped_thread scopedThread = { std::thread(Hello, localVal) };
 
-    int maxNumberOfPrints = 5;
-    // Dont create max num of threads if unneeded
-    maxThreads > maxNumberOfPrints ? maxThreads = maxNumberOfPrints : maxThreads;
-    std::vector<std::thread> threads;
-    for (int i = 0; i < maxThreads-1; i++)
-    {
-        threads.emplace_back(Hello, 10);
-    }
-    for (auto& thread : threads)
-    {
-        std::cout << "Joining thread ID: " << thread.get_id() << "\n";
-        thread.join();
-    }
+	nbt::threadsafe_queue<int> queue;
+
+	nbt::scoped_thread t1 = { std::thread([&]()
+	{
+		queue.push(5);
+	}) };
+
+	nbt::scoped_thread t2 = { std::thread([&]()
+	{
+		auto val = queue.wait_and_pop();
+		std::cout << *val << std::endl;
+	}) };
+
+	bool emp = queue.empty();
+
+    //ThreadGuard tg1(t1);
+//
+    //int maxNumberOfPrints = 5;
+    //// Dont create max num of threads if unneeded
+    //maxThreads > maxNumberOfPrints ? maxThreads = maxNumberOfPrints : maxThreads;
+    //std::vector<std::thread> threads;
+    //for (int i = 0; i < maxThreads-1; i++)
+    //{
+    //    threads.emplace_back(Hello, 10);
+    //}
+    //for (auto& thread : threads)
+    //{
+    //    std::cout << "Joining thread ID: " << thread.get_id() << "\n";
+    //    thread.join();
+    //}
     return 0;
 }
